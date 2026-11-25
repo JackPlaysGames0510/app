@@ -31,7 +31,9 @@ static NSDictionary<NSString*, NSDictionary*>* BHTSettingsPages(void) {
                     @{@"key": @"no_focus_lost",
                       @"default": @NO},
                     @{@"key": @"show_scroll_indicator",
-                      @"default": @NO}
+                      @"default": @NO},
+                    @{@"key": @"ipad_split_view",
+                      @"default": @YES}
                 ]
             },
             @"appearance": @{
@@ -89,6 +91,8 @@ static NSDictionary<NSString*, NSDictionary*>* BHTSettingsPages(void) {
                       @"default": @YES},
                     @{@"key": @"hide_timeline_prompts",
                       @"default": @YES},
+                    @{@"key": @"hide_videos_for_you",
+                      @"default": @NO},
                     @{@"key": @"hide_spaces",
                       @"default": @NO},
                     @{@"key": @"hide_custom_timelines",
@@ -106,7 +110,15 @@ static NSDictionary<NSString*, NSDictionary*>* BHTSettingsPages(void) {
                       @"default": @NO},
                     @{@"key": @"hide_quote_tweets",
                       @"default": @NO},
+                    @{@"key": @"hide_ai_tweets",
+                      @"default": @NO},
+                    @{@"key": @"hide_paid_tweets",
+                      @"default": @NO},
                     @{@"key": @"hide_verified_tweets",
+                      @"default": @NO},
+                    @{@"key": @"hide_video_history",
+                      @"default": @NO},
+                    @{@"key": @"hide_article_history",
                       @"default": @NO},
                     @{@"key": @"restore_refresh_sounds",
                       @"default": @YES}
@@ -179,6 +191,11 @@ static NSDictionary<NSString*, NSDictionary*>* BHTSettingsPages(void) {
                     },
                     @{
                         @"key": @"restore_video_timestamp",
+                        @"default": @NO,
+                        @"type": @"toggle"
+                    },
+                    @{
+                        @"key": @"disable_double_tap_like",
                         @"default": @NO,
                         @"type": @"toggle"
                     },
@@ -313,12 +330,22 @@ static NSDictionary<NSString*, NSDictionary*>* BHTSettingsPages(void) {
                         @"type": @"toggle"
                     },
                     @{
+                        @"key": @"hide_made_on_x",
+                        @"default": @NO,
+                        @"type": @"toggle"
+                    },
+                    @{
                         @"key": @"use_tenor_gifs",
                         @"default": @NO,
                         @"type": @"toggle"
                     },
                     @{
                         @"key": @"disable_media_carousel",
+                        @"default": @NO,
+                        @"type": @"toggle"
+                    },
+                    @{
+                        @"key": @"hide_media_previews",
                         @"default": @NO,
                         @"type": @"toggle"
                     },
@@ -335,11 +362,6 @@ static NSDictionary<NSString*, NSDictionary*>* BHTSettingsPages(void) {
                     @{
                         @"key": @"show_account_location",
                         @"default": @YES,
-                        @"type": @"toggle"
-                    },
-                    @{
-                        @"key": @"restore_tweet_labels",
-                        @"default": @NO,
                         @"type": @"toggle"
                     },
                     @{

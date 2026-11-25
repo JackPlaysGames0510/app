@@ -12,6 +12,8 @@
 #import "Headers/TWHeaders.h"
 #import "Settings/ModernSettingsCells.h"
 
+extern void BHTDimSettingDidChange(BOOL enabled);
+
 @interface AppearanceSettingsViewController () <UIFontPickerViewControllerDelegate>
 @end
 
@@ -90,25 +92,21 @@
 - (void)showCustomTabBarVC:(NSDictionary*)sender {
     UIViewController* customTabBarVC = [CustomTabBarUtility editorForAccount:self.account];
     if (customTabBarVC) {
-        // X supplies the native editor's own title and account subtitle.
-        if (self.account && ![CustomTabBarUtility usesNativeEditor]) {
-            [customTabBarVC.navigationItem
-                setTitleView:[objc_getClass("TFNTitleView")
-                                 titleViewWithTitle:[[BHTBundle sharedBundle]
-                                                        localizedStringForKey:
-                                                            @"CUSTOM_TAB_BAR_SETTINGS_NAVIGATION_TITLE"]
-                                           subtitle:self.account.displayUsername]];
-        }
         [self.navigationController pushViewController:customTabBarVC animated:YES];
     } else {
         BHTBundle* bundle = [BHTBundle sharedBundle];
+        NSString* messageKey = @"CUSTOM_TAB_BAR_UNAVAILABLE_MESSAGE";
+        NSString* message = [bundle localizedStringForKey:messageKey];
+        if ([message isEqualToString:messageKey]) {
+            message = @"Custom tab bar customization isn't available in this version of the app.";
+        }
         UIAlertController* alert = [UIAlertController
             alertControllerWithTitle:[bundle localizedStringForKey:@"CUSTOM_TAB_BAR_SETTINGS_NAVIGATION_TITLE"]
-                             message:[bundle localizedStringForKey:@"UNKNOWN_ERROR"]
+                             message:message
                       preferredStyle:UIAlertControllerStyleAlert];
         [alert addAction:[UIAlertAction actionWithTitle:[bundle localizedStringForKey:@"OK_ACTION_LABEL"]
-                                                 style:UIAlertActionStyleCancel
-                                               handler:nil]];
+                                                  style:UIAlertActionStyleCancel
+                                                handler:nil]];
         [self presentViewController:alert animated:YES completion:nil];
     }
 }
@@ -124,16 +122,15 @@
 }
 
 - (void)refreshTabViewsWithThemingInView:(UIView*)view {
+    if ([view respondsToSelector:@selector(nfb_refreshGlassTabLabels)]) {
+        [view performSelector:@selector(nfb_refreshGlassTabLabels)];
+    }
     if ([view respondsToSelector:@selector(nfb_applyGlassTabAccent)]) {
         [view performSelector:@selector(nfb_applyGlassTabAccent)];
     }
     if ([view isKindOfClass:NSClassFromString(@"T1TabView")]) {
-        if ([view respondsToSelector:@selector(_t1_updateImageViewAnimated:)]) {
-            [view performSelector:@selector(_t1_updateImageViewAnimated:) withObject:@(NO)];
-        }
-        if ([view respondsToSelector:@selector(_t1_updateTitleLabel)]) {
-            [view performSelector:@selector(_t1_updateTitleLabel)];
-        }
+        T1TabView* tabView = (T1TabView*)view;
+        [tabView _t1_updateImageViewAnimated:NO];
         if ([view respondsToSelector:@selector(_t1_layoutForTabBar)]) {
             [view performSelector:@selector(_t1_layoutForTabBar)];
         }
@@ -142,14 +139,6 @@
         }
         if ([view respondsToSelector:@selector(_t1_layoutBadgeViewMinimized)]) {
             [view performSelector:@selector(_t1_layoutBadgeViewMinimized)];
-        }
-
-        // Clearing the override lets the label fall back to its default color.
-        if (![BHTSettings boolForKey:@"tab_bar_theming"]) {
-            UILabel* titleLabel = [view valueForKey:@"titleLabel"];
-            if (titleLabel) {
-                titleLabel.textColor = nil;
-            }
         }
     }
 
@@ -167,22 +156,14 @@
 }
 
 - (void)refreshTabViewsInView:(UIView*)view {
+    if ([view respondsToSelector:@selector(nfb_refreshGlassTabLabels)]) {
+        [view performSelector:@selector(nfb_refreshGlassTabLabels)];
+    }
     if ([view isKindOfClass:NSClassFromString(@"T1TabView")]) {
-        if ([view respondsToSelector:@selector(_t1_updateTitleLabel)]) {
-            [view performSelector:@selector(_t1_updateTitleLabel)];
-        }
-        if ([view respondsToSelector:@selector(_t1_layoutForTabBar)]) {
-            [view performSelector:@selector(_t1_layoutForTabBar)];
-        }
+        [view setNeedsLayout];
+        [view layoutIfNeeded];
         if ([view respondsToSelector:@selector(_t1_layoutBadgeViewMaximized)]) {
             [view performSelector:@selector(_t1_layoutBadgeViewMaximized)];
-        }
-
-        if (![BHTSettings boolForKey:@"tab_bar_theming"]) {
-            UILabel* titleLabel = [view valueForKey:@"titleLabel"];
-            if (titleLabel) {
-                titleLabel.textColor = nil;
-            }
         }
     }
 
@@ -203,22 +184,7 @@
             [self refreshAllTabViews];
         });
     } else if ([key isEqualToString:@"enable_dim_theme"]) {
-        UIAlertController* alertController =
-            [UIAlertController alertControllerWithTitle:[[BHTBundle sharedBundle]
-                                                            localizedStringForKey:@"DIM_THEME_RESTART_ALERT_TITLE"]
-                                                message:[[BHTBundle sharedBundle]
-                                                            localizedStringForKey:@"DIM_THEME_RESTART_ALERT_MESSAGE"]
-                                         preferredStyle:UIAlertControllerStyleAlert];
-
-        alertController.modalPresentationStyle = UIModalPresentationFullScreen;
-        UIAlertAction* restartAction = [UIAlertAction actionWithTitle:[[BHTBundle sharedBundle]
-                                                                          localizedStringForKey:@"DIM_THEME_RESTART_ALERT_RESTART_BUTTON"]
-                                                                style:UIAlertActionStyleDestructive
-                                                              handler:^(UIAlertAction* action) {
-                                                                  exit(0);
-                                                              }];
-        [alertController addAction:restartAction];
-        [self presentViewController:alertController animated:YES completion:nil];
+        BHTDimSettingDidChange(sender.isOn);
     }
 }
 

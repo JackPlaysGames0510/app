@@ -163,10 +163,6 @@
 @property (nonatomic, strong) UIColor* backgroundColor;
 @end
 
-@interface UIFont (TFNUIFontGroup)
-- (UIFont*)tfn_withMonospacedDigits;
-@end
-
 @interface UIImage (TFNAdditions)
 + (id)tfn_vectorImageNamed:(id)arg1
                   fitsSize:(struct CGSize)arg2
@@ -201,4 +197,16 @@
 @interface _TtC10TFNUISwift25LegacySegmentedTabBarView : UIView
 @property (nonatomic, retain) _TtC10TFNUISwift26LegacySegmentedTabBarStyle* style;
 @property (nonatomic) long long selectedIndex;
+@end
+
+@interface NavigationControllerFactoryTFNFallback : NSObject
++ (UINavigationController*)makeWithRootViewController:(UIViewController*)controller;
+@end
+
+@interface TFNAvatarImageView : UIView
+@property (nonatomic) NSInteger style;
+@end
+
+@interface TFNPullToRefreshControl : UIView
+- (BOOL)loading;
 @end

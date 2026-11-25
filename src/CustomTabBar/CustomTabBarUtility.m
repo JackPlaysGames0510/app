@@ -8,7 +8,6 @@
 #import "CustomTabBarUtility.h"
 #import <objc/message.h>
 #import "Core/BHTSettings.h"
-#import "CustomTabBarViewController.h"
 #import "Headers/T1Headers.h"
 
 @protocol BHTNativeTabCustomizationInitializing <NSObject>
@@ -37,20 +36,14 @@ static NSString* const kLegacyHiddenKey = @"bh_tabs_hidden";
 #pragma mark - Editor routing
 
 + (BOOL)usesNativeEditor {
-    id host = [NSClassFromString(@"T1HostViewController") sharedHostViewController];
-    if ([host respondsToSelector:@selector(appNavigation)]) {
-        id navigation = ((id (*)(id, SEL))objc_msgSend)(host, @selector(appNavigation));
-        if (navigation) {
-            Class routerClass = NSClassFromString(@"_TtC14T1TwitterSwift20XTabbedAppNavigation");
-            return routerClass && [navigation isKindOfClass:routerClass];
-        }
-    }
-    return [BHTSettings boolForKey:@"liquid_glass"];
+    Class editorClass = NSClassFromString(@"T1TabCustomizationViewController");
+    return [editorClass isSubclassOfClass:[UIViewController class]] &&
+           [editorClass instancesRespondToSelector:@selector(initWithAccount:scribeContext:)];
 }
 
 + (UIViewController*)editorForAccount:(id)account {
     if (![self usesNativeEditor]) {
-        return [[CustomTabBarViewController alloc] init];
+        return nil;
     }
 
     Class editorClass = NSClassFromString(@"T1TabCustomizationViewController");
@@ -77,7 +70,8 @@ static NSString* const kLegacyHiddenKey = @"bh_tabs_hidden";
     }
 
     return (UIViewController*)[(id<BHTNativeTabCustomizationInitializing>)[editorClass alloc]
-        initWithAccount:account scribeContext:context];
+        initWithAccount:account
+          scribeContext:context];
 }
 
 #pragma mark - Live capture

@@ -156,3 +156,31 @@ NSString* formatNumberWithSuffix(long long number) {
         return [NSString stringWithFormat:@"%.1fB", number / 1000000000.0];
     }
 }
+
+bool NFBLiquidGlassEnabled(void) {
+    return [BHTSettings boolForKey:@"liquid_glass"];
+}
+
+BOOL boolIvar(id object, const char* name, BOOL fallback) {
+    Ivar ivar = class_getInstanceVariable(object_getClass(object), name);
+    if (!ivar) {
+        return fallback;
+    }
+    return *(BOOL*)((uint8_t*)(__bridge void*)object + ivar_getOffset(ivar));
+}
+
+void setBoolIvar(id object, const char* name, BOOL value) {
+    Ivar ivar = class_getInstanceVariable(object_getClass(object), name);
+    if (ivar) {
+        *(BOOL*)((uint8_t*)(__bridge void*)object + ivar_getOffset(ivar)) = value;
+    }
+}
+
+id objectIvar(id object, const char* name) {
+    Ivar ivar = class_getInstanceVariable(object_getClass(object), name);
+    return ivar ? object_getIvar(object, ivar) : nil;
+}
+
+id ObjectForSelector(id object, SEL selector) {
+    return ((id (*)(id, SEL))objc_msgSend)(object, selector);
+}
